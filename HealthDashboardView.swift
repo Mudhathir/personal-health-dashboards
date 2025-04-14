@@ -1,72 +1,65 @@
+// MARK: - Main SwiftUI View
 import SwiftUI  // Import SwiftUI for building the user interface
 
 struct HealthDashboardView: View {  // Define the main view for the dashboard
     @StateObject var healthKitManager = HealthKitManager()  // Create and observe HealthKitManager instance
     
     var body: some View {
-        NavigationView {  // Enables a navigation bar at the top
-            VStack(spacing: 20) {  // Vertical stack with 20 points of spacing between elements
+        NavigationView {  // Enables navigation UI with a top bar
+            VStack(spacing: 20) {  // Main vertical stack with spacing between UI elements
                 Text("Personal Health Dashboards")  // Title text
-                    .font(.largeTitle)               // Set font size to large title
-                    .padding()                       // Add padding around the title
+                    .font(.largeTitle)  // Apply large title font
+                    .padding()  // Add padding around the title
                 
-                VStack(alignment: .leading, spacing: 15) {  // Group health data items, aligned to the left with spacing of 15
-                    HStack {  // Horizontal stack for steps data
-                        Text("Steps Today:")                   // Label for steps
-                        Spacer()                               // Space between label and value
-                        Text("\(Int(healthKitManager.stepCount))")  // Display step count as an integer
+                VStack(alignment: .leading, spacing: 15) {  // Health metrics section
+                    HStack {  // Display steps count
+                        Text("Steps Today:")  // Label
+                        Spacer()  // Push value to the right
+                        Text("\(Int(healthKitManager.stepCount))")  // Display step count value
                     }
                     
-                    HStack {  // Horizontal stack for heart rate data
-                        Text("Latest Heart Rate:")                        // Label for heart rate
-                        Spacer()                                        // Space between label and value
-                        Text(String(format: "%.1f bpm", healthKitManager.heartRate))  // Format and display heart rate
+                    HStack {  // Display heart rate
+                        Text("Latest Heart Rate:")  // Label
+                        Spacer()
+                        Text(String(format: "%.1f bpm", healthKitManager.heartRate))  // Heart rate value
                     }
                     
-                    HStack {  // Horizontal stack for dietary energy data
-                        Text("Dietary Energy:")                     // Label for energy consumed
-                        Spacer()                                   // Space between label and value
-                        Text(String(format: "%.0f kcal", healthKitManager.dietaryEnergyConsumed))  // Format and display energy consumed
+                    HStack {  // Display dietary energy consumed
+                        Text("Dietary Energy:")  // Label
+                        Spacer()
+                        Text(String(format: "%.0f kcal", healthKitManager.dietaryEnergyConsumed))  // Energy value
                     }
-                    
-                    VStack(alignment: .leading) {  // Vertical stack for sleep analysis data
-                        Text("Sleep Analysis:")  // Label for sleep analysis
-                        if healthKitManager.sleepAnalysis.isEmpty {  // Check if sleep data is empty
-                            Text("No sleep data available.")        // Inform user when data is missing
-                                .italic()                             // Italicize the message
+
+                    VStack(alignment: .leading) {  // Display sleep data
+                        Text("Sleep Analysis:")  // Label
+                        if healthKitManager.sleepAnalysis.isEmpty {  // Check if data is available
+                            Text("No sleep data available.")  // Placeholder text
+                                .italic()
                         } else {
-                            // Display each sleep sample with start and end times
-                            ForEach(healthKitManager.sleepAnalysis, id: \.uuid) { sample in
-                                let start = sample.startDate      // Get start date of sleep sample
-                                let end = sample.endDate          // Get end date of sleep sample
-                                Text("From: \(formattedDate(start)) to: \(formattedDate(end))")  // Format dates for display
-                                    .font(.caption)             // Use caption font size
+                            ForEach(healthKitManager.sleepAnalysis, id: \..uuid) { sample in  // Loop through sleep samples
+                                let start = sample.startDate  // Start time of sleep
+                                let end = sample.endDate  // End time of sleep
+                                Text("From: \(formattedDate(start)) to: \(formattedDate(end))")  // Display sleep times
+                                    .font(.caption)  // Smaller font
                             }
                         }
                     }
                 }
-                .padding()  // Add padding around the health data section
-                Spacer()     // Add flexible space to push content upward
+                .padding()  // Padding around the metrics
+                Spacer()  // Push content to the top
             }
             .onAppear {
-                // When the view appears, request HealthKit permissions and fetch data
-                healthKitManager.requestAuthorization()
+                healthKitManager.requestAuthorization()  // Request HealthKit access when view loads
             }
-            .navigationBarTitle("Dashboard", displayMode: .inline)  // Set the navigation bar title
+            .navigationBarTitle("Dashboard", displayMode: .inline)  // Set navigation bar title
         }
     }
     
-    // Helper function to format Date objects into readable strings
+    // Helper function to format dates
     func formattedDate(_ date: Date) -> String {
-        let formatter = DateFormatter()       // Create a new DateFormatter
-        formatter.dateStyle = .short           // Set date style to short (e.g., 6/23/21)
-        formatter.timeStyle = .short           // Set time style to short (e.g., 3:45 PM)
-        return formatter.string(from: date)    // Return the formatted date string
-    }
-}
-
-struct HealthDashboardView_Previews: PreviewProvider {  // SwiftUI preview structure
-    static var previews: some View {
-        HealthDashboardView()  // Preview the HealthDashboardView
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short  // e.g. 6/23/21
+        formatter.timeStyle = .short  // e.g. 3:45 PM
+        return formatter.string(from: date)
     }
 }
